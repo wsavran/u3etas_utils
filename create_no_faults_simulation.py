@@ -69,7 +69,7 @@ with open(os.path.join(args.nofaults_dir, 'config.json'), 'w') as f:
 # edits simulation slurm file inplace, so need to copy before
 for line in fileinput.input(os.path.join(nofaultsdir_exp, slurm_basename), inplace=True):
     if line.startswith('ETAS_CONF_JSON'):
-        print(f'ETAS_CONF_JSON={args.nofaults_dir}')
+        print(f'ETAS_CONF_JSON={os.path.join(args.nofaults_dir,config_basename)}')
     elif line.startswith("#SBATCH -N") and args.nodes:
         print(f'#SBATCH -N {args.nodes}')
     elif line.startswith("#SBATCH -t") and args.run_time:
@@ -83,7 +83,7 @@ for line in fileinput.input(os.path.join(nofaultsdir_exp, slurm_basename), inpla
 if handle_plot_slurm:
     for line in fileinput.input(os.path.join(nofaultsdir_exp, slurm_plot_basename), inplace=True):
         if line.startswith('ETAS_CONF_JSON'):
-            print(f'ETAS_CONF_JSON={args.nofaults_dir}')
+            print(f'ETAS_CONF_JSON={os.path.join(args.nofaults_dir,config_basename)}')
         elif line.startswith("#SBATCH -p") and args.queue:
             print(f'#SBATCH -p {args.queue}')
         else:
