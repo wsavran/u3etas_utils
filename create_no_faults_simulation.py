@@ -4,9 +4,34 @@ import os
 import sys
 import json
 import shutil
-import fileinput
 import random
 import argparse
+import datetime
+import fileinput
+
+def datetime_to_utc_epoch(dt):
+    """
+    Converts python datetime.datetime into epoch_time in milliseconds. This is copied from the csep package and done to 
+    keep this script running with a default python installation.
+
+    Args:
+        dt (datetime.datetime): python datetime object, should be naive.
+    """
+    if dt is None:
+        return dt
+
+    if dt.tzinfo is None:
+        dt=dt.replace(tzinfo=datetime.timezone.utc)
+
+    if str(dt.tzinfo) != 'UTC':
+        raise ValueError(f"Timezone info must be UTC. tzinfo={dt.tzinfo}")
+
+    epoch = datetime.datetime(1970, 1, 1, 0, 0, 0, 0).replace(tzinfo=datetime.timezone.utc)
+    epoch_time_seconds = (dt - epoch).total_seconds()
+    return int(1000.0 * epoch_time_seconds)
+
+def utc_now_epoch():
+    return datetime_to_utc_epoch(datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc))
 
 parser = argparse.ArgumentParser(description='Converts a ucerf3 model on faults to a no-faults model')
 required = parser.add_argument_group('required')
@@ -60,7 +85,7 @@ config['simulationName'] = config['simulationName'] + ', No Faults'
 config['outputDir'] = args.nofaults_dir
 config['probModel'] = 'POISSON'
 config['totRateScaleFactor'] = 1.0
-config['randomSeed'] = random.getrandbits(64)
+config['randomSeed'] = utc_now_epoch() 
 config['griddedOnly'] = True
 # write to new dir
 with open(os.path.join(args.nofaults_dir, 'config.json'), 'w') as f:
